@@ -3,6 +3,12 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\CommentController;
+use App\Http\Controllers\Api\ReelController;
+
+
+
 
 
 
@@ -15,15 +21,23 @@ Route::post('/login', [App\Http\Controllers\Api\AuthController::class, 'login'])
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/posts', [App\Http\Controllers\Api\PostController::class, 'createPost']);
+    Route::get('/users', [UserController::class, 'getProfile']);
+    Route::post('/auth/setup-profile', [UserController::class, 'setupProfile']);
+    Route::get('/posts', [PostController::class, 'getAllPosts']);
+
+    Route::post('/comments', [CommentController::class, 'createComment']);
+    Route::get('/comments', [CommentController::class, 'getComments']);
+    Route::post('/reels', [ReelController::class, 'createReel']);
+    Route::post('/reels1', [ReelController::class, 'getReels']);
     
 
 });
 
 
 
-Route::get('/foo', function () {
-    Artisan::call('storage:link');
-});
+// Route::get('/foo', function () {
+//     Artisan::call('storage:link');
+// });
 
 
 // Route::get('/user', function (Request $request) {

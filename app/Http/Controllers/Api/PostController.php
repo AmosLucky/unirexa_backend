@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use App\Services\ModerationService;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+
 
 
 
@@ -17,6 +19,72 @@ use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
+    
+
+
+public function getAllPosts()
+{
+    $user = Auth::user();
+
+    $posts = Post::with(['media', 'user'])
+        ->withCount(['likes', 'comments', 'shares'])
+        ->latest()
+        ->paginate(10); // ✅ pagination added
+
+return [];
+    $formattedPosts = $posts->getCollection()->map(function ($post) use ($user) {
+
+        return [
+            'id' => $post->id,
+            'content' => $post->content,
+
+            // ✅ Media
+            'media' => $post->media->map(function ($media) {
+                return [
+                    'type' => $media->type,
+                    'url' => url('storage/' . $media->file_path),
+                ];
+            }),
+
+            'created_at' => $post->created_at->toISOString(),
+
+            // ✅ Counts (optimized)
+            'likes_count' => $post->likes_count,
+            'comments_count' => $post->comments_count,
+            'shares_count' => $post->shares_count,
+
+            // ✅ Example logic (adjust later)
+            'is_follow' => $user->following()
+                ->where('following_id', $post->user_id)
+                ->exists(),
+
+            'has_seen' => false, // you can implement view tracking later
+
+            // ✅ Author
+            'author' => [
+                'id' => $post->user->id,
+                'username' => $post->user->username,
+                'avatar' => $post->user->image
+                    ? url('storage/' . $post->user->image)
+                    : null,
+            ],
+        ];
+    });
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Posts fetched successfully',
+        'data' => $formattedPosts,
+
+        // ✅ Pagination meta (important for frontend)
+        'pagination' => [
+            'current_page' => $posts->currentPage(),
+            'last_page' => $posts->lastPage(),
+            'per_page' => $posts->perPage(),
+            'total' => $posts->total(),
+        ]
+    ]);
+}
     // ✅ Create a new post with optional content and media
 /**
      * Create a new post
@@ -65,6 +133,7 @@ class PostController extends Controller
                     $path = $file->store('uploads/posts', 'public');
 Media::create([
     'post_id' => $post->id,
+    
     'media_type' => $type,
     'url' => Storage::url($path),
     'thumbnail' => $type == 'video' ? 'path/to/thumbnail.jpg' : null,

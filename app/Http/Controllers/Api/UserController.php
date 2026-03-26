@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use App\Models\Rex;
+use Illuminate\Support\Facades\Storage;
+
 
 class UserController extends Controller
 {
@@ -192,6 +194,7 @@ public function updateUser(Request $request)
 
 
 
+
 public function getProfile($id)
 {
     $authUser = auth()->user();
@@ -267,6 +270,43 @@ public function getRexers($id)
     return response()->json([
         'status' => true,
         'data' => $rexers
+    ]);
+}
+
+
+public function setupProfile(Request $request)
+{
+    $user = auth()->user();
+
+    // ✅ Validate request
+    $request->validate([
+        'date_of_birth' => 'required|date',
+        'bio' => 'required|string|max:500',
+        'image' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+    ]);
+
+    // ✅ Store image
+    $path = $request->file('image')->store('profiles', 'public');
+
+    // ✅ Generate full URL
+    $imageUrl = asset('storage/' . $path);
+
+    // ✅ Save user profile (adjust fields as needed)
+    $user->update([
+        'date_of_birth' => $request->date_of_birth,
+        'bio' => $request->bio,
+        'image' => $path, // store relative path in DB
+    ]);
+
+    return response()->json([
+        'status' => true,
+        'message' => 'Profile setup successful',
+        'image_url' => $imageUrl, 
+        'data' => [
+            'date_of_birth' => $user->date_of_birth,
+            'bio' => $user->bio,
+            'image_url' => $imageUrl, // ✅ full path returned
+        ]
     ]);
 }
 

@@ -24,4 +24,9 @@ class Media extends Model
     {
         return $this->morphTo();
     }
+
+    public function media()
+{
+    return $this->morphMany(PostMedia::class, 'mediable');
+}
 }
