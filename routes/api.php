@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\ReelController;
+use App\Http\Controllers\Api\PostController;
+
 
 
 
@@ -23,7 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/posts', [App\Http\Controllers\Api\PostController::class, 'createPost']);
     Route::get('/users', [UserController::class, 'getProfile']);
     Route::post('/auth/setup-profile', [UserController::class, 'setupProfile']);
-    Route::get('/posts', [PostController::class, 'getAllPosts']);
+    Route::post('/posts1', [PostController::class, 'getAllPosts']);
 
     Route::post('/comments', [CommentController::class, 'createComment']);
     Route::get('/comments', [CommentController::class, 'getComments']);
