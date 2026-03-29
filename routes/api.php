@@ -23,7 +23,7 @@ Route::post('/login', [App\Http\Controllers\Api\AuthController::class, 'login'])
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/posts', [App\Http\Controllers\Api\PostController::class, 'createPost']);
-    Route::get('/users', [UserController::class, 'getProfile']);
+    Route::post('/users/{id}', [UserController::class, 'getProfile']);
     Route::post('/auth/setup-profile', [UserController::class, 'setupProfile']);
     Route::post('/posts1', [PostController::class, 'getAllPosts']);
 

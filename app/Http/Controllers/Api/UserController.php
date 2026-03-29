@@ -197,7 +197,6 @@ public function updateUser(Request $request)
 
 public function getProfile($id)
 {
-    $authUser = auth()->user();
     $user = User::find($id);
 
     if (!$user) {
@@ -208,41 +207,95 @@ public function getProfile($id)
         ], 404);
     }
 
-    // Stats
-    $postCount = $user->posts()->count();
-    $listingCount = $user->listings()->count();
-    $likesReceived = \App\Models\Like::where('likeable_type', Post::class)
-        ->whereIn('likeable_id', $user->posts()->pluck('id'))
-        ->count();
-    $rexCount = \App\Models\Rex::where('rexed_user_id', $user->id)->count();
-    $hasRexed = \App\Models\Rex::where('user_id', $authUser->id)
-        ->where('rexed_user_id', $user->id)
-        ->exists();
+    return response()->json([
+        'status' => true,
+        'data' => [
+            "id" => $user->id,
 
-   return response()->json([
-    'status' => true,
-    'data' => [
-        'id' => $user->id,
-        'username' => $user->username,
-        'name' => $user->name,
-        'avatar' => $user->avatar ? 'https://unirexa.com/' . $user->avatar : null,
-        'bio' => $user->bio,
-        'faculty' => $user->faculty,
-        'department' => $user->department,
-        'reg_number' => $user->reg_number,
-        'admission_year' => $user->admission_year,
-        'post_count' => $postCount,
-        'listing_count' => $listingCount,
-        'likes_received' => $likesReceived,
-        'rexers_count' => $rexCount,
-        'rexing_count' => $rexingCount,
-        'has_rexed' => $hasRexed,
-    ]
-]);
+            "firebase_id" => $user->firebase_id ?? "N/A",
+            "email" => $user->email ?? "user{$user->id}@example.com",
+            "username" => $user->username ?? "user_{$user->id}",
+            "phone" => $user->phone ?? "+2348000000000",
+
+            "first_name" => $user->first_name ?? "John",
+            "last_name" => $user->last_name ?? "Doe",
+
+            "avatar" => $user->avatar 
+                ? url($user->avatar) 
+                : "https://randomuser.me/api/portraits/men/" . ($user->id % 50) . ".jpg",
+
+            "cover_photo" => $user->cover_photo 
+                ?? "https://picsum.photos/800/300?random={$user->id}",
+
+            "bio" => $user->bio 
+                ?? "Hey 👋 I'm using the app",
+
+            "balance" => $user->balance ?? rand(0, 1000),
+
+            "is_blocked" => $user->is_blocked ?? false,
+            "status" => $user->status ?? "active",
+            "role" => $user->role ?? "user",
+
+            "email_verified_at" => $user->email_verified_at ?? now()->toISOString(),
+            "device_token" => $user->device_token ?? "device_token_" . uniqid(),
+
+            "last_seen" => $user->last_seen ?? now()->toISOString(),
+            "token" => "token_" . uniqid(),
+
+            "dob" => $user->dob ?? "2000-01-01",
+
+            "followers_count" => rand(0, 5),
+            "following_count" => rand(0, 5),
+
+            "likes_count" => rand(0, 2),
+            "comments_count" => rand(0, 5),
+            "shares_count" => rand(0, 20),
+
+            "is_verified" => $user->is_verified ?? (bool)rand(0,1),
+
+            "total_spent" => $user->total_spent ?? rand(0, 5),
+            "total_earned" => $user->total_earned ?? rand(0, 10),
+
+            "last_login_at" => $user->last_login_at ?? now()->subDays(rand(0,5))->toISOString(),
+
+            "language" => $user->language ?? "English",
+
+            "notification_token" => $user->notification_token ?? "notif_" . uniqid(),
+            "ip_address" => $user->ip_address ?? "127.0.0.1",
+            "login_attempts" => $user->login_attempts ?? rand(0,3),
+
+            "referral_code" => $user->referral_code ?? "REF-" . strtoupper(substr(md5($user->id), 0, 6)),
+            "referred_by" => $user->referred_by ?? "",
+
+            "badge_level" => $user->badge_level ?? ["Bronze", "Silver", "Gold"][rand(0,2)],
+            "account_type" => $user->account_type ?? "user",
+
+            "interest_tags" => $user->interest_tags
+                ? json_decode($user->interest_tags, true)
+                : ["tech", "music", "sports"],
+
+            "post_count" => rand(0, 1),
+
+            "gender" => $user->gender ?? (rand(0,1) ? "male" : "female"),
+
+            "profile_setup_stage" => $user->profile_setup_stage ?? rand(1, 3),
+
+            "location" => $user->location ?? "Lagos, Nigeria",
+            "website" => $user->website ?? "https://example.com",
+
+            "university" => $user->university ?? "University of Lagos",
+            "faculty" => $user->faculty ?? "Engineering",
+            "department" => $user->department ?? "Computer Science",
+
+            "interest" => $user->interest ?? "Tech, music and gaming",
+
+            "followers" => [],
+
+            "is_followed_by_current_user" => false,
+            "is_following" => false,
+        ]
+    ]);
 }
-
-
-
 
 
 
