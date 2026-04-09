@@ -40,4 +40,9 @@ class Reel extends Model
     {
         return $this->morphMany(Comment::class, 'commentable');
     }
+
+    public function likes()
+    {
+        return $this->morphMany(Like::class, 'likeable');
+    }
 }

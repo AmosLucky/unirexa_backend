@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use App\Services\ModerationService;
 use App\Models\User;
+//use App\Models\Follower;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -21,51 +22,52 @@ class PostController extends Controller
 {
     
 
-
 public function getAllPosts()
 {
     $user = Auth::user();
 
     $posts = Post::with(['media', 'user'])
         ->withCount(['likes', 'comments', 'shares'])
+        ->with(['likes' => function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        }])
         ->latest()
-        ->paginate(10); // ✅ pagination added
+        ->paginate(10); // ✅ FIXED
 
-return [];
     $formattedPosts = $posts->getCollection()->map(function ($post) use ($user) {
 
         return [
             'id' => $post->id,
             'content' => $post->content,
 
-            // ✅ Media
             'media' => $post->media->map(function ($media) {
                 return [
                     'type' => $media->type,
-                    'url' => url('storage/' . $media->file_path),
+                    'url' => url( $media->url),
                 ];
             }),
 
             'created_at' => $post->created_at->toISOString(),
 
-            // ✅ Counts (optimized)
             'likes_count' => $post->likes_count,
             'comments_count' => $post->comments_count,
             'shares_count' => $post->shares_count,
 
-            // ✅ Example logic (adjust later)
-            'is_follow' => $user->following()
-                ->where('following_id', $post->user_id)
-                ->exists(),
+            // ✅ FIXED
+            'is_liked' => $post->likes->isNotEmpty(),
 
-            'has_seen' => false, // you can implement view tracking later
+            'is_follow' =>   false,
+            // $user->following()
+            //     ->where('following_id', $post->user_id)
+            //     ->exists(),
 
-            // ✅ Author
+            'has_seen' => false,
+
             'author' => [
                 'id' => $post->user->id,
-                'username' => $post->user->username,
-                'avatar' => $post->user->image
-                    ? url('storage/' . $post->user->image)
+                'username' => $post->user->username ?? $post->user->name,
+                'avatar' => $post->user->avatar
+                    ? url('files/' . $post->user->avatar)
                     : null,
             ],
         ];
@@ -76,7 +78,6 @@ return [];
         'message' => 'Posts fetched successfully',
         'data' => $formattedPosts,
 
-        // ✅ Pagination meta (important for frontend)
         'pagination' => [
             'current_page' => $posts->currentPage(),
             'last_page' => $posts->lastPage(),

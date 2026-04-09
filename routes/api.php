@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\ReelController;
 use App\Http\Controllers\Api\PostController;
+use App\Http\Controllers\Api\LikeController;
 
 
 
@@ -19,6 +20,8 @@ use App\Http\Controllers\Api\PostController;
 Route::post('/register', [App\Http\Controllers\Api\AuthController::class, 'registerUser']);
 // routes/api.php
 Route::post('/verify-email', [App\Http\Controllers\Api\AuthController::class, 'verifyEmail']);
+Route::post('/login_by_id',[App\Http\Controllers\Api\AuthController::class, 'loginByUserId']);
+
 Route::post('/login', [App\Http\Controllers\Api\AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -29,8 +32,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/comments', [CommentController::class, 'createComment']);
     Route::get('/comments', [CommentController::class, 'getComments']);
+        Route::post('/comments1', [CommentController::class, 'getComments']);
+
     Route::post('/reels', [ReelController::class, 'createReel']);
     Route::post('/reels1', [ReelController::class, 'getReels']);
+    Route::post('/like', [LikeController::class, 'toggleLike']);
+
     
 
 });

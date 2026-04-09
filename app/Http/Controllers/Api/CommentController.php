@@ -20,6 +20,7 @@ class CommentController extends Controller
         'commentable_id' => 'required|integer',
         'commentable_type' => 'required|string|in:post,reel',
     ]);
+    
 
     if ($validator->fails()) {
         return response()->json([

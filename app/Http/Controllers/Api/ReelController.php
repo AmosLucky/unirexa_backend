@@ -101,12 +101,15 @@ class ReelController extends Controller
 
 
 
-
 public function getReels()
 {
     $user = auth()->user();
 
     $reels = Reel::with('user')
+        ->withCount('likes') // ✅ real like count
+        ->with(['likes' => function ($query) use ($user) {
+            $query->where('user_id', $user->id); // ✅ current user like
+        }])
         ->latest()
         ->get();
 
@@ -116,27 +119,28 @@ public function getReels()
             'id' => $reel->id,
 
             // 🎬 video
-            'video_url' => $reel->video_ulr
-                ? url('storage/' . $reel->video_ulr)
+            'video_url' => $reel->video_url
+                ? url('files/' . $reel->video_url)
                 : null,
 
             // ✍️ content
             'caption' => $reel->caption,
 
-            // #️⃣ hashtags (convert string → array)
+            // #️⃣ hashtags
             'hashtags' => $reel->hashtags
                 ? array_values(array_filter(explode(' ', $reel->hashtags)))
                 : [],
 
             'allow_comment' => (bool) $reel->allow_comment,
 
-            // ❤️ stats
-            'like_count' => (int) $reel->like_count,
+            // ❤️ REAL stats
+            'like_count' => $reel->likes_count, // ✅ FIXED
             'comment_count' => $reel->comments()->count(),
-            'share_count' => (int) $reel->share_count ?? 0,
+            'share_count' => (int) ($reel->share_count ?? 0),
 
-            // 👇 user state (you can later implement real logic)
-            'is_liked' => false,
+            // ✅ REAL user state
+            'is_liked' => $reel->likes->isNotEmpty(),
+
             'is_seen' => false,
 
             // ⏱ time

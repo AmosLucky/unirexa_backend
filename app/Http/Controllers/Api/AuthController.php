@@ -311,6 +311,64 @@ public function login(Request $request)
     }
 
 
+
+    
+public function loginByUserId(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|integer',
+            
+        ]);
+
+        // if ($validator->fails()) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Invalid input data!',
+        //         'errors' => $validator->errors(),
+        //     ], 422);
+        // }
+
+        try {
+            $user = User::where('id', $request->user_id)->first();
+
+           
+
+            // Generate API token
+            $token = $user->createToken('auth_token')->plainTextToken;
+            $user->token = $token;
+
+            // Collect user-related stats
+            $user->post_count = Post::where('user_id', $user->id)->count();
+            $user->followers_count = 0;//Follower::where('followed_id', $user->id)->count();
+            $user->following_count = 0;//Follower::where('follower_id', $user->id)->count();
+            $user->likes_count = 0;//Like::where('user_id', $user->id)->count();
+            $user->comments_count = Comment::where('user_id', $user->id)->count();
+            $user->shares_count = 0;//Share::where('user_id', $user->id)->count();
+             
+             $user->token2 = $token;//Share::where('user_id', $user->id)->count();
+
+            // Followers IDs
+            $user->followers = [];//Follower::where('followed_id', $user->id)->pluck('follower_id');
+
+            // Optional flags (for consistency)
+            $user->is_followed_by_current_user = false;
+            $user->is_following = false;
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Login successful!',
+                'data' => $user,
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Login failed: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
 // public function login(Request $request)
 //     {
 //         $validator= Validator::make($request->all(),[
