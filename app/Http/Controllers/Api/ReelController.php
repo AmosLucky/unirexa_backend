@@ -151,7 +151,7 @@ public function getReels()
                 'id' => $reel->user->id,
                 'username' => $reel->user->username ?? $reel->user->name,
                 'avatar' => $reel->user->avatar
-                    ? url('storage/' . $reel->user->avatar)
+                    ? url('files/' . $reel->user->avatar)
                     : null,
             ],
         ];

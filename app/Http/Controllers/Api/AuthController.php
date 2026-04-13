@@ -172,6 +172,9 @@ class AuthController extends Controller
                 $avatarUrl = url('uploads/avatars/' . $fileName);
 
                 $user->avatar = $avatarUrl;
+                 $user->avatar = $user->avatar 
+    ? url('files/' . $user->avatar)
+    : null;
             }
 
             // ✅ Update other fields
@@ -288,6 +291,9 @@ public function login(Request $request)
             $user->shares_count = 0;//Share::where('user_id', $user->id)->count();
              
              $user->token2 = $token;//Share::where('user_id', $user->id)->count();
+              $user->avatar = $user->avatar 
+    ? url('files/' . $user->avatar)
+    : null;
 
             // Followers IDs
             $user->followers = [];//Follower::where('followed_id', $user->id)->pluck('follower_id');
@@ -336,6 +342,9 @@ public function loginByUserId(Request $request)
             // Generate API token
             $token = $user->createToken('auth_token')->plainTextToken;
             $user->token = $token;
+            $user->avatar = $user->avatar 
+    ? url('files/' . $user->avatar)
+    : null;
 
             // Collect user-related stats
             $user->post_count = Post::where('user_id', $user->id)->count();
